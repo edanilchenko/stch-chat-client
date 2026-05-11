@@ -1,13 +1,22 @@
 class Message {
-  final String text;
-  final String sender;
+  final int id;
+  final String content;
+  final int userId;
+  final String createdAt;
 
-  Message({required this.text, required this.sender});
+  Message({
+    required this.id,
+    required this.content,
+    required this.userId,
+    required this.createdAt,
+  });
 
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
-      text: json['text'],
-      sender: json['sender'],
+      id: json['id'] as int,
+      content: json['content'] as String,
+      userId: json['user_id'] as int,
+      createdAt: (json['created_at'] ?? '') as String,
     );
   }
 }

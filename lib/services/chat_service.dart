@@ -1,21 +1,19 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../models/message.dart';
+import 'api_client.dart';
 
 class ChatService {
-  final String baseUrl = 'http://127.0.0.1:8000/api';
+  final ApiClient apiClient;
+
+  ChatService(this.apiClient);
 
   Future<List<Message>> fetchMessages() async {
-    final res = await http.get(Uri.parse('$baseUrl/messages'));
-
-    final data = jsonDecode(res.body);
-    return data.map<Message>((m) => Message.fromJson(m)).toList();
+    final response = await apiClient.dio.get('/messages');
+    final data = response.data as List<dynamic>;
+    return data.map((m) => Message.fromJson(m as Map<String, dynamic>)).toList();
   }
 
-  Future<void> sendMessage(String text) async {
-    await http.post(
-      Uri.parse('$baseUrl/messages'),
-      body: {'text': text},
-    );
+  Future<Message> sendMessage(String content) async {
+    final response = await apiClient.dio.post('/messages', data: {'content': content});
+    return Message.fromJson(response.data as Map<String, dynamic>);
   }
 }
