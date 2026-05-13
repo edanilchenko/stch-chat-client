@@ -13,7 +13,7 @@ class ChatService {
   }
 
   Future<Message> sendMessage(String content) async {
-    final response = await apiClient.dio.post('/messages', data: {'content': content});
+    final response = await apiClient.dio.post('/messages', data: {'text': content});
     return Message.fromJson(response.data as Map<String, dynamic>);
   }
 }

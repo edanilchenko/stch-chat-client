@@ -18,7 +18,9 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
-    _startPolling();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _startPolling();
+    });
   }
 
   @override

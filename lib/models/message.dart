@@ -14,7 +14,7 @@ class Message {
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
       id: json['id'] as int,
-      content: json['content'] as String,
+      content: json['text'] as String,
       userId: json['user_id'] as int,
       createdAt: (json['created_at'] ?? '') as String,
     );
