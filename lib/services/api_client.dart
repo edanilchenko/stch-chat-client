@@ -1,15 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiClient {
   static const _baseUrl = 'http://127.0.0.1:8000/api';
   static const _tokenKey = 'auth_token';
+  static const _userKey = 'auth_user';
 
   String? _token;
   late final Dio dio;
 
-  // Set by AuthProvider to redirect to login on 401
   VoidCallback? onUnauthorized;
 
   ApiClient() {
@@ -24,10 +24,9 @@ class ApiClient {
     ));
 
     dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) async {
-        final token = _token;
-        if (token != null) {
-          options.headers['Authorization'] = 'Bearer $token';
+      onRequest: (options, handler) {
+        if (_token != null) {
+          options.headers['Authorization'] = 'Bearer $_token';
         }
         handler.next(options);
       },
@@ -39,8 +38,34 @@ class ApiClient {
       },
     ));
   }
-  
-  Future<void> saveToken(String token) async => _token = token;
-  Future<void> clearToken() async => _token = null;
-  Future<String?> getToken() => Future.value(_token);
+
+  Future<void> saveToken(String token) async {
+    _token = token;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_tokenKey, token);
+  }
+
+  Future<void> saveUserJson(String userJson) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_userKey, userJson);
+  }
+
+  Future<void> clearCredentials() async {
+    _token = null;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_tokenKey);
+    await prefs.remove(_userKey);
+  }
+
+  Future<String?> readToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString(_tokenKey);
+    _token = token;
+    return token;
+  }
+
+  Future<String?> readUserJson() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_userKey);
+  }
 }

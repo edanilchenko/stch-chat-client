@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'providers/auth_provider.dart';
-import 'providers/message_provider.dart';
-import 'screens/chat_page.dart';
+import 'providers/conversation_provider.dart';
+import 'screens/conversation_list_screen.dart';
 import 'screens/login_screen.dart';
 import 'services/api_client.dart';
-import 'services/chat_service.dart';
+import 'services/api_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,11 +19,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final apiClient = ApiClient();
+    final apiService = ApiService(apiClient);
 
     return MultiProvider(
       providers: [
+        Provider<ApiService>.value(value: apiService),
         ChangeNotifierProvider(create: (_) => AuthProvider(apiClient)),
-        ChangeNotifierProvider(create: (_) => MessageProvider(ChatService(apiClient))),
+        ChangeNotifierProvider(
+            create: (_) => ConversationProvider(apiService)),
       ],
       child: MaterialApp(
         title: 'Chat',
@@ -39,8 +43,9 @@ class _AuthGate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return switch (context.watch<AuthProvider>().status) {
-      AuthStatus.unknown => const Scaffold(body: Center(child: CircularProgressIndicator())),
-      AuthStatus.authenticated => const ChatPage(),
+      AuthStatus.unknown =>
+        const Scaffold(body: Center(child: CircularProgressIndicator())),
+      AuthStatus.authenticated => const ConversationListScreen(),
       AuthStatus.unauthenticated => const LoginScreen(),
     };
   }
