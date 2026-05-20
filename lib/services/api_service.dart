@@ -57,6 +57,17 @@ class ApiService {
     });
   }
 
+  Future<List<User>> searchUsers(String query) {
+    return _call(() async {
+      final response = await _client.dio
+          .get('/users/search', queryParameters: {'q': query});
+      final data = response.data as List<dynamic>;
+      return data
+          .map((u) => User.fromJson(u as Map<String, dynamic>))
+          .toList();
+    });
+  }
+
   Future<Conversation> startConversation(int userId) {
     return _call(() async {
       final response = await _client.dio.post(
